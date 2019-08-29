@@ -41,12 +41,16 @@ def handleClient(client):
 
         if msg['type'] == servconst.GAME_SEARCH_MESSAGE:
             print '>>> Received request:', msg
+            availableRoom = None
+
             if not rooms.full():
+                # create new room
                 if rooms.empty():
                     roomNum = random.randint(0, servconst.APP_BACKLOG)
                     gameElement = {'room_number': roomNum, 'participants': [client]}
                     rooms.put(gameElement)
                     permit = 0  # wait
+                # join existing room
                 else:
                     availableRoom = rooms.get()
                     roomNum = availableRoom['room_number']
@@ -57,7 +61,14 @@ def handleClient(client):
                 roomNum = -1
 
             msg = {'type': servconst.GAME_SEARCH_MESSAGE, 'room': roomNum, 'permit': permit}
-            client.send(bytes(msg))
+            if availableRoom is not None:
+                print 'availableroom:', availableRoom['participants']
+                for c in availableRoom['participants']:
+                    print 'sending to', c, msg
+                    c.send(bytes(msg))
+            else:
+                print 'single sending to', client, msg
+                client.send(bytes(msg))
 
 
 def removeRoom(chatServer):
