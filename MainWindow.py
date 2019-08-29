@@ -75,7 +75,6 @@ class MainWindow:
                         self.board.place(x=BOARD_POSITION[0], y=BOARD_POSITION[1])
                         controller = GameController()
                         controller.connect(self.protocol, self.board)
-
-                    break  # permit is either -1 or 1
+                break
         except Exception:
             pass
