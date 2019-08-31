@@ -2,6 +2,7 @@ from server import ServerConstants as servconst
 from PIL import ImageTk, Image
 import Tkinter as tk
 from server import Protocol
+from util import TkinterScheduler
 from board import Board
 from threading import Thread
 from GameController import GameController
@@ -27,8 +28,9 @@ class MainWindow:
         yPos = self.root.winfo_screenheight() / 2 - WINDOW_HEIGHT / 2
         self.root.geometry('{}x{}+{}+{}'.format(WINDOW_WIDTH, WINDOW_HEIGHT, xPos, yPos))
 
-        # precreation of the board
-        self.board = Board.Board(self.root, BOARD_AREA)
+        # preperation of the board
+        self.board = None
+        Thread(target=self.__initBoard).start()
 
         # enter button
         self.enterButton = tk.Button(self.root, command=self.__waitForOpponent)
@@ -43,6 +45,9 @@ class MainWindow:
 
         # wait for opponent in separate thread
         Thread(target=self.__playOnline).start()
+
+    def __initBoard(self):
+        self.board = Board.Board(self.root, BOARD_AREA)
 
     def __waitForOpponent(self):
         self.waiting = True
@@ -71,10 +76,12 @@ class MainWindow:
                         print '>>> Waiting for an opponent.'
                         continue
                     else:  # allow
-                        self.enterButton.grid_remove()
+                        def removeEnterButton():
+                            self.enterButton.grid_remove()
+
+                        TkinterScheduler.perform(self.root, removeEnterButton)
                         self.board.place(x=BOARD_POSITION[0], y=BOARD_POSITION[1])
                         controller = GameController()
                         controller.connect(self.protocol, self.board)
-                break
         except Exception:
             pass
