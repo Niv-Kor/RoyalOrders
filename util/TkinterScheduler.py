@@ -1,2 +1,2 @@
-def perform(root, func, *args):
-    root.after(0, func, args=args)
+def perform(root, func):
+    root.after(0, func)

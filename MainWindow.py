@@ -52,6 +52,9 @@ class MainWindow:
     def __waitForOpponent(self):
         self.waiting = True
 
+    def __removeEnterButton(self):
+        self.enterButton.grid_remove()
+
     def __playOnline(self):
         while True:
             if self.waiting:
@@ -76,12 +79,9 @@ class MainWindow:
                         print '>>> Waiting for an opponent.'
                         continue
                     else:  # allow
-                        def removeEnterButton():
-                            self.enterButton.grid_remove()
-
-                        TkinterScheduler.perform(self.root, removeEnterButton)
                         self.board.place(x=BOARD_POSITION[0], y=BOARD_POSITION[1])
-                        controller = GameController()
+                        controller = GameController(self.board)
                         controller.connect(self.protocol, self.board)
+                        TkinterScheduler.perform(self.root, self.__removeEnterButton)
         except Exception:
             pass
